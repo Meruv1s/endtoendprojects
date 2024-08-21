@@ -2,8 +2,10 @@ package com.sumanth.backendconcepts.controller;
 
 
 
+import com.sumanth.backendconcepts.payload.JwtAuthResponse;
 import com.sumanth.backendconcepts.payload.LoginDto;
 import com.sumanth.backendconcepts.payload.UserDto;
+import com.sumanth.backendconcepts.security.JwtTokenProvider;
 import com.sumanth.backendconcepts.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -25,8 +27,8 @@ public class AuthController {
       UserService userService;
      @Autowired
      private AuthenticationManager authenticationManager;
-//     @Autowired
-//     private JwtTokenProvider jwtTokenProvider;
+     @Autowired
+     private JwtTokenProvider jwtTokenProvider;
     @PostMapping("/register")
     public ResponseEntity<UserDto> createuser (@RequestBody UserDto userdto)
     {
@@ -34,7 +36,7 @@ return new ResponseEntity<>(  userService.createuser(userdto), HttpStatus.CREATE
 
     }
     @PostMapping("/login")
-    public ResponseEntity<String> loginUser(@RequestBody LoginDto loginDto) {
+    public ResponseEntity<JwtAuthResponse> loginUser(@RequestBody LoginDto loginDto) {
         Authentication authentication = authenticationManager
                 .authenticate(new UsernamePasswordAuthenticationToken(loginDto.getEmail(), loginDto.getPassword()));
 
@@ -42,10 +44,10 @@ return new ResponseEntity<>(  userService.createuser(userdto), HttpStatus.CREATE
 
         SecurityContextHolder.getContext().setAuthentication(authentication);
 
-      //  String token = jwtTokenProvider.generateToken(authentication);
+       String token = jwtTokenProvider.generateToken(authentication);
 
-        // return ResponseEntity.ok(new JwtAuthResponse(token));
-        return new ResponseEntity<>("user logged in successfully",HttpStatus.OK);
+        return ResponseEntity.ok(new JwtAuthResponse(token));
+       // return new ResponseEntity<>("user logged in successfully",HttpStatus.OK);
     }
 
 }
